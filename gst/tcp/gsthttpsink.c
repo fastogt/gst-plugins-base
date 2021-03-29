@@ -62,7 +62,7 @@ enum
 static void gst_http_sink_finalize (GObject * gobject);
 
 static void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *client,
-                              GstBuffer *buf);
+                              gchar *buf, gssize size);
 
 static gboolean gst_http_sink_init_send (GstMultiHandleSink * this);
 static gboolean gst_http_sink_close (GstMultiHandleSink * this);
@@ -164,16 +164,37 @@ gst_http_sink_finalize (GObject * gobject)
 }
 
 void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *client,
-                                       GstBuffer *buf) {
-  GstMapInfo map;
-
+                                       gchar *buf, gssize size) {
+  gchar* raw = buf;
+  GstHTTPSink *hsink = GST_HTTP_SINK (sink);
   if (!buf) {
     return;
   }
 
-  gst_buffer_map (buf, &map, GST_MAP_READ);
-  GST_WARNING ("readed buffer of size %" G_GSIZE_FORMAT, map.size);
-  gst_buffer_unmap (buf, &map);
+  // Method
+  size_t meth_len = strcspn(raw, " ");
+  if (strncmp(raw, "HEAD", 4) != 0) {
+    return;
+  }
+
+  raw += meth_len + 1; // move past <SP>
+
+  // Request-URI
+  size_t url_len = strcspn(raw, " ");
+  gchar* path = g_malloc(url_len + 1);
+  if (!path) {
+    return;
+  }
+
+  memcpy(path, raw, url_len);
+  path[url_len] = '\0';
+  if (strcmp(hsink->key, path + 1) != 0) {
+    g_free(path);
+    return;
+  }
+
+  GST_DEBUG_OBJECT (sink, "gst_http_sink_read_buffer http path %s", path);
+  g_free(path);
 }
 
 /* handle a read request on the server,

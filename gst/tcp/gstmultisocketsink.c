@@ -662,17 +662,18 @@ gst_multi_socket_sink_handle_client_read (GstMultiSocketSink * sink,
   } while (navail > 0);
   g_clear_error (&err);
 
+  if (ret) {
+    if (sink->read_buffer) {
+      sink->read_buffer(sink, mhclient, mem, maxmem);
+    }
+  }
+
   if (do_event) {
     if (ret) {
       GstBuffer *buf;
       GstEvent *ev;
 
       buf = gst_buffer_new_wrapped (omem, maxmem);
-
-      if (sink->read_buffer) {
-        sink->read_buffer(sink, mhclient, buf);
-      }
-
       ev = gst_event_new_custom (GST_EVENT_CUSTOM_UPSTREAM,
           gst_structure_new ("GstNetworkMessage",
               "object", G_TYPE_OBJECT, mhclient->handle.socket,
