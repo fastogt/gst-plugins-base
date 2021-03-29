@@ -167,14 +167,18 @@ void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *
                                        gchar *buf, gssize size) {
   gchar* raw = buf;
   GstHTTPSink *hsink = GST_HTTP_SINK (sink);
+  gchar *reply;
+  GstBuffer *buffer;
   if (!buf) {
-    return;
+    reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
+    goto done;
   }
 
   // Method
   size_t meth_len = strcspn(raw, " ");
-  if (strncmp(raw, "HEAD", 4) != 0) {
-    return;
+  if (strncmp(raw, "GET", 3) != 0) {
+    reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
+    goto done;
   }
 
   raw += meth_len + 1; // move past <SP>
@@ -183,18 +187,26 @@ void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *
   size_t url_len = strcspn(raw, " ");
   gchar* path = g_malloc(url_len + 1);
   if (!path) {
-    return;
+    reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
+    goto done;
   }
 
   memcpy(path, raw, url_len);
   path[url_len] = '\0';
   if (strcmp(hsink->key, path + 1) != 0) {
+    reply = "HTTP/1.1 404 Not Found\nConnection: close\n\n";
     g_free(path);
-    return;
+    goto done;
   }
 
   GST_DEBUG_OBJECT (sink, "gst_http_sink_read_buffer http path %s", path);
   g_free(path);
+
+  reply = "HTTP/1.1 200 OK\nContent-Type: video/mp2t\n\n";
+done:
+  buffer = gst_buffer_new_wrapped (reply, strlen(reply));
+  gst_buffer_ref (buffer);
+  client->sending = g_slist_append (client->sending, buffer);
 }
 
 /* handle a read request on the server,
