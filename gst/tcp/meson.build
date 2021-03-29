@@ -8,6 +8,7 @@ tcp_sources = [
   'gsttcpserversink.c',
   'gsttcpsrcstats.c',
   'gsttcpplugin.c',
+  'gsthttpsink.c',
 ]
 
 if core_conf.has('HAVE_SYS_SOCKET_H')

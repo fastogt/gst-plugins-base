@@ -65,6 +65,9 @@ typedef struct {
 struct _GstMultiSocketSink {
   GstMultiHandleSink element;
 
+  void          (*read_buffer) (GstMultiSocketSink *sink, GstMultiHandleClient *client,
+                                GstBuffer *buf);
+
   /*< private >*/
   GMainContext *main_context;
   GCancellable *cancellable;
