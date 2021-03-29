@@ -45,7 +45,7 @@
 
 #define TCP_BACKLOG             5
 
-#define TCP_DEFAULT_KEY "fastocloud"
+#define TCP_DEFAULT_KEY "/fastocloud"
 
 GST_DEBUG_CATEGORY_STATIC (httpsink_debug);
 #define GST_CAT_DEFAULT (httpsink_debug)
@@ -169,13 +169,16 @@ void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *
   GstHTTPSink *hsink = GST_HTTP_SINK (sink);
   gchar *reply;
   GstBuffer *buffer;
+  gssize meth_len;
+  gssize url_len;
+  gchar* path;
   if (!buf) {
     reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
     goto done;
   }
 
   // Method
-  size_t meth_len = strcspn(raw, " ");
+  meth_len = strcspn(raw, " ");
   if (strncmp(raw, "GET", 3) != 0) {
     reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
     goto done;
@@ -184,8 +187,8 @@ void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *
   raw += meth_len + 1; // move past <SP>
 
   // Request-URI
-  size_t url_len = strcspn(raw, " ");
-  gchar* path = g_malloc(url_len + 1);
+  url_len = strcspn(raw, " ");
+  path = g_malloc(url_len + 1);
   if (!path) {
     reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
     goto done;
@@ -193,7 +196,7 @@ void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *
 
   memcpy(path, raw, url_len);
   path[url_len] = '\0';
-  if (strcmp(hsink->key, path + 1) != 0) {
+  if (strcmp(hsink->key, path) != 0) {
     reply = "HTTP/1.1 404 Not Found\nConnection: close\n\n";
     g_free(path);
     goto done;
