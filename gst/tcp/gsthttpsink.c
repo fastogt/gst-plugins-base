@@ -103,7 +103,7 @@ gst_http_sink_class_init (GstHTTPSinkClass * klass)
           "The port to listen to (0=random available port)",
           0, TCP_HIGHEST_PORT, TCP_DEFAULT_PORT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-  g_object_class_install_property (gobject_class, PROP_HOST,
+  g_object_class_install_property (gobject_class, PROP_KEY,
       g_param_spec_string ("key", "key", "The endpoint key",
           TCP_DEFAULT_KEY, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
   /**
