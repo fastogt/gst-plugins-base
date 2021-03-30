@@ -172,6 +172,10 @@ void gst_http_sink_read_buffer (GstMultiSocketSink *sink, GstMultiHandleClient *
   gssize meth_len;
   gssize url_len;
   gchar* path;
+  if (!client->handle_write) {
+    return;
+  }
+
   if (!buf) {
     reply = "HTTP/1.1 401 Bad Request\nConnection: close\n\n";
     goto done;
@@ -210,7 +214,7 @@ done:
   buffer = gst_buffer_new_wrapped (reply, strlen(reply));
   gst_buffer_ref (buffer);
   client->sending = g_slist_append (client->sending, buffer);
-  sink->read_buffer = NULL;
+  client->handle_write = FALSE;
 }
 
 /* handle a read request on the server,

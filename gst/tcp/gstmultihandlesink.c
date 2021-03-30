@@ -440,6 +440,7 @@ gst_multi_handle_sink_init (GstMultiHandleSink * this)
   this->qos_dscp = DEFAULT_QOS_DSCP;
 
   this->resend_streamheader = DEFAULT_RESEND_STREAMHEADER;
+  this->handle_write = TRUE;
 }
 
 static void
