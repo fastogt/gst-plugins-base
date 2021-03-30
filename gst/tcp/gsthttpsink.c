@@ -210,6 +210,7 @@ done:
   buffer = gst_buffer_new_wrapped (reply, strlen(reply));
   gst_buffer_ref (buffer);
   client->sending = g_slist_append (client->sending, buffer);
+  sink->read_buffer = NULL;
 }
 
 /* handle a read request on the server,
