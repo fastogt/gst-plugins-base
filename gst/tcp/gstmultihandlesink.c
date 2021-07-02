@@ -546,6 +546,8 @@ gst_multi_handle_sink_client_init (GstMultiHandleClient * client,
   client->disconnect_time = 0;
   /* set last activity time to connect time */
   client->last_activity_time = client->connect_time;
+  /* fastogt */
+  client->handle_write = TRUE;
 }
 
 static void

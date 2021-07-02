@@ -26,6 +26,7 @@
 #include "gsttcpclientsink.h"
 #include "gsttcpserversrc.h"
 #include "gsttcpserversink.h"
+#include "gsthttpsink.h"
 #include "gstmultifdsink.h"
 #include "gstmultisocketsink.h"
 
@@ -45,6 +46,9 @@ plugin_init (GstPlugin * plugin)
     return FALSE;
   if (!gst_element_register (plugin, "tcpserversink", GST_RANK_NONE,
           GST_TYPE_TCP_SERVER_SINK))
+    return FALSE;
+  if (!gst_element_register (plugin, "httpsink", GST_RANK_NONE,
+          GST_TYPE_HTTP_SINK))
     return FALSE;
   if (!gst_element_register (plugin, "tcpserversrc", GST_RANK_NONE,
           GST_TYPE_TCP_SERVER_SRC))
